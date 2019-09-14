@@ -1,0 +1,22 @@
+.success {
+  border: 1px solid yellowgreen;
+  color: rgb(7, 139, 40)
+}
+
+.error {
+  border: 1px solid orangered;
+  color: rgb(236, 14, 99)
+}
+
+.blog-card {
+  border: 1px solid rgb(64, 102, 226);
+  padding: 10px 5px 5px 8px;
+  margin-bottom: 5px;
+}
+
+.blog-card--title {
+  background-color: rgb(144, 235, 207);
+  border: 1px solid rgb(64, 102, 226);
+  padding: 10px 5px 5px 8px;
+  margin-bottom: 5px;
+}
