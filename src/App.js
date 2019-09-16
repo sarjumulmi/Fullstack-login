@@ -110,7 +110,7 @@ const App = () => {
       {message && <Notification message={message} />}
       {user === null && <LoginForm username={username} password={password} handleLogin={handleLogin} setUsername={setUsername} setPassword={setPassword} />}
       {user !== null && (
-        <div>
+        <div >
           <h2>Blogs</h2>
           <div>{user.username} logged in</div>
           <span><button onClick={handleLogout} >Logout</button></span>

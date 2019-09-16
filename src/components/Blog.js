@@ -28,7 +28,7 @@ const Blog = ({ blog }) => {
 
   return(
     blogToDisplay === null ? null : (
-      <div>
+      <div className="blog">
         <div className="blog-card--title" onClick={toggleVisibility}>
           {blogToDisplay.title} {blogToDisplay.author}
         </div>
@@ -39,8 +39,8 @@ const Blog = ({ blog }) => {
               {blogToDisplay.likes} likes
               <button onClick={() => handleLike(blogToDisplay)}>like</button>
             </div>
-            <div>Added by {user.username}</div>
-            {user.id === blog.user.id && (
+            <div>Added by {user && user.username}</div>
+            {user && user.id === blog.user.id && (
               <div>
                 <button onClick={() => handleDeleteBlog(blogToDisplay)}>Delete blog</button>
               </div>
