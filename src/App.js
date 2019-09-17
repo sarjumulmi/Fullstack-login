@@ -29,8 +29,6 @@ const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setU
 )
 
 const App = () => {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [message, setMessage] = useState(null)
   const [user, setUser] = useState(null)
   const [blogs, setBlogs] = useState(null)
@@ -57,24 +55,22 @@ const App = () => {
     setBlogs(null)
   }
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e, username, password) => {
     e.preventDefault()
     try {
-      const user = await loginServices.login({ username, password })
+      const user = await loginServices.login({ username: username.value, password: password.value })
       setUser(user)
       window.localStorage.setItem('user', JSON.stringify(user))
       blogServices.setToken(user.token)
       const resp = await blogServices.getAll()
       setBlogs(resp.data)
-      setUsername('')
-      setPassword('')
-      setMessage({ msg: `User ${username} logged in!`, type: 'success' })
+      setMessage({ msg: `User ${username.value} logged in!`, type: 'success' })
       setTimeout(() => {
         setMessage(null)
       }, 5000)
     } catch (error) {
       console.log(error)
-      setMessage({ msg: error.response.data.error || 'incorrect credentials', type: 'error' })
+      setMessage({ msg: (error.response && error.response.data && error.response.data.error) || 'incorrect credentials', type: 'error' })
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -108,7 +104,7 @@ const App = () => {
   return (
     <div>
       {message && <Notification message={message} />}
-      {user === null && <LoginForm username={username} password={password} handleLogin={handleLogin} setUsername={setUsername} setPassword={setPassword} />}
+      {user === null && <LoginForm handleLogin={handleLogin} />}
       {user !== null && (
         <div >
           <h2>Blogs</h2>
