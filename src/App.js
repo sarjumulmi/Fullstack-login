@@ -10,6 +10,7 @@ import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 
 import { initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog } from './components/blogReducer'
+import { notify } from './components/notificationReducer'
 
 import './App.css'
 
@@ -24,8 +25,8 @@ const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setU
   </form>
 )
 
-const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog }) => {
-  const [message, setMessage] = useState(null)
+const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, message, notify }) => {
+  // const [message, setMessage] = useState(null)
   const [user, setUser] = useState(null)
   // const [blogs, setBlogs] = useState([])
   const [title, setTitle] = useState('')
@@ -49,6 +50,7 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog })
   }, [])
 
   const handleLogout = () => {
+    notify({ msg: `User ${user.username} logged out!`, type: 'success' })
     window.localStorage.removeItem('user')
     setUser(null)
     resetBlogs()
@@ -61,17 +63,11 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog })
       window.localStorage.setItem('user', JSON.stringify(user))
       blogServices.setToken(user.token)
       setUser(user)
-      setMessage({ msg: `User ${username.value} logged in!`, type: 'success' })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      notify({ msg: `User ${username.value} logged in!`, type: 'success' })
       initBlogs()
     } catch (error) {
       console.log(error)
-      setMessage({ msg: (error.response && error.response.data && error.response.data.error) || 'incorrect credentials', type: 'error' })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      notify({ msg: (error.response && error.response.data && error.response.data.error) || 'incorrect credentials', type: 'error' })
     }
   }
 
@@ -82,37 +78,26 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog })
       setAuthor('')
       setTitle('')
       setUrl('')
-      setMessage({ msg: `new blog ${title} created!`, type: 'success' })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      notify({ msg: `new blog ${title} created!`, type: 'success' })
     } catch (error) {
       console.log(error.response)
       setAuthor('')
       setTitle('')
       setUrl('')
-      setMessage({ msg: error.response.data.error || 'some went wrong', type: 'error' })
-      setTimeout(() => {
-        setMessage(null)
-      }, 5000)
+      notify({ msg: error.response.data.error || 'some went wrong', type: 'error' })
     }
   }
 
   const handleLike = async (blog) => {
-    // const likedBlog = { ...blog, likes: blog.likes + 1 }
-    // const updatedBlog = await blogServices.update(likedBlog)
-    // setBlogs(blogs.map(b => b.id === blog.id ? updatedBlog : b))
     likeBlog(blog)
-    setMessage({ msg: `blog ${blog.title} liked!`, type: 'success' })
-    setTimeout(() => {
-      setMessage(null)
-    }, 5000)
+    notify({ msg: `blog ${blog.title} liked!`, type: 'success' })
   }
 
   const handleDeleteBlog = async (blog) => {
     if (window.confirm(`remove Blog ${blog.title} by ${blog.author}?`)) {
       deleteBlog(blog)
     }
+    notify({ msg: `${blog.title} deleted!`, type: 'success' })
   }
 
   return (
@@ -138,12 +123,13 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog })
   )
 }
 
-const mapStateToProps = ({ blogs }) => ({
-  blogs
+const mapStateToProps = ({ blogs, message }) => ({
+  blogs,
+  message
 })
 
 const mapDispatchToProps = {
-  initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog
+  initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, notify
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)
