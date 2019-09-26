@@ -24,15 +24,38 @@ export const resetBlogs = () => ({
   type: 'RESET_BLOGS'
 })
 
+export const likeBlog = (blog) => {
+  return async (dispatch) => {
+    const updatedBlog = await blogServices.update(blog)
+    dispatch({
+      type: 'LIKE',
+      payload: updatedBlog
+    })
+  }
+}
+
+export const deleteBlog = (blog) => {
+  return async (dispatch) => {
+    await blogServices.remove(blog)
+    dispatch({
+      type: 'REMOVE',
+      payload: blog
+    })
+  }
+}
+
 const blogReducer = (state=[], action) => {
   switch (action.type) {
   case 'INIT_BLOGS':
-    console.log('blogs are: ', action)
     return action.payload
   case 'ADD_BLOG':
     return [ ...state, action.payload ]
   case 'RESET_BLOGS':
     return []
+  case 'LIKE':
+    return state.map(b => b.id === action.payload.id ? action.payload : b)
+  case 'REMOVE':
+    return state.filter(b => b.id !== action.payload.id)
   default:
     return state
   }

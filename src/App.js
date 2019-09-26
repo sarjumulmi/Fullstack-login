@@ -9,7 +9,7 @@ import Blog from './components/Blog'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 
-import { initBlogs, createBlog, resetBlogs } from './components/blogReducer'
+import { initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog } from './components/blogReducer'
 
 import './App.css'
 
@@ -24,7 +24,7 @@ const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setU
   </form>
 )
 
-const App = ({ blogs, initBlogs, createBlog, resetBlogs }) => {
+const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog }) => {
   const [message, setMessage] = useState(null)
   const [user, setUser] = useState(null)
   // const [blogs, setBlogs] = useState([])
@@ -102,16 +102,16 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs }) => {
     // const likedBlog = { ...blog, likes: blog.likes + 1 }
     // const updatedBlog = await blogServices.update(likedBlog)
     // setBlogs(blogs.map(b => b.id === blog.id ? updatedBlog : b))
-    // setMessage({ msg: `blog ${blog.title} liked!`, type: 'success' })
-    // setTimeout(() => {
-    //   setMessage(null)
-    // }, 5000)
+    likeBlog(blog)
+    setMessage({ msg: `blog ${blog.title} liked!`, type: 'success' })
+    setTimeout(() => {
+      setMessage(null)
+    }, 5000)
   }
 
   const handleDeleteBlog = async (blog) => {
     if (window.confirm(`remove Blog ${blog.title} by ${blog.author}?`)) {
-      // await blogServices.remove(blog)
-      // setBlogs(null)
+      deleteBlog(blog)
     }
   }
 
@@ -126,7 +126,7 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs }) => {
           <span><button onClick={handleLogout} >Logout</button></span>
           {blogs.sort((a, b) => b.likes - a.likes).map(blog => (
             <div key={ blog.id }>
-              <Blog blog={ blog } handleDeleteBlog={handleDeleteBlog} handleLike={handleLike} isCreator={true} user={user}/>
+              <Blog blog={ blog } handleDeleteBlog={handleDeleteBlog} handleLike={handleLike} isCreator={blog.user.username === user.username} user={user}/>
             </div>
           ))}
           <Togglable buttonLabel='Create new blog'>
@@ -143,7 +143,7 @@ const mapStateToProps = ({ blogs }) => ({
 })
 
 const mapDispatchToProps = {
-  initBlogs, createBlog, resetBlogs
+  initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

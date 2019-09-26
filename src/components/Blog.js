@@ -20,7 +20,7 @@ const Blog = ({ blog, handleDeleteBlog, handleLike, isCreator, user }) => {
               {blog.likes} likes
               <button onClick={() => handleLike(blog)}>like</button>
             </div>
-            <div>Added by {user.username}</div>
+            <div>Added by {blog.user.username}</div>
             {isCreator && (
               <div>
                 <button onClick={() => handleDeleteBlog(blog)}>Delete blog</button>
