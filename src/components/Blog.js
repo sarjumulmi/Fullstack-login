@@ -1,48 +1,29 @@
-import React, { useState, useEffect } from 'react'
-import blogServices from '../services/blogs'
+import React, { useState } from 'react'
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, handleDeleteBlog, handleLike, isCreator, user }) => {
   const [visible, setVisible] = useState(false)
-  const [user, setUser] = useState(null)
-  const [blogToDisplay, setBlogToDisplay] = useState(blog)
-
-  useEffect(() => {
-    setUser(JSON.parse(window.localStorage.getItem('user')))
-  }, [])
 
   const toggleVisibility = () => {
     setVisible(!visible)
   }
 
-  const handleLike = async (blog) => {
-    await blogServices.update(blog)
-    setBlogToDisplay({ ...blog, likes: blog.likes + 1 })
-  }
-
-  const handleDeleteBlog = async (blog) => {
-    if (window.confirm(`remove Blog ${blogToDisplay.title} by ${blogToDisplay.author}?`)) {
-      await blogServices.remove(blog)
-      setBlogToDisplay(null)
-    }
-  }
-
   return(
-    blogToDisplay === null ? null : (
+    blog === null ? null : (
       <div className="blog">
         <div className="blog-card--title" onClick={toggleVisibility}>
-          {blogToDisplay.title} {blogToDisplay.author}
+          {blog.title} {blog.author}
         </div>
         {visible && (
           <div className="blog-card">
-            <a href="#">{blogToDisplay.url}</a>
+            <a href="#">{blog.url}</a>
             <div>
-              {blogToDisplay.likes} likes
-              <button onClick={() => handleLike(blogToDisplay)}>like</button>
+              {blog.likes} likes
+              <button onClick={() => handleLike(blog)}>like</button>
             </div>
-            <div>Added by {user && user.username}</div>
-            {user && user.id === blog.user.id && (
+            <div>Added by {user.username}</div>
+            {isCreator && (
               <div>
-                <button onClick={() => handleDeleteBlog(blogToDisplay)}>Delete blog</button>
+                <button onClick={() => handleDeleteBlog(blog)}>Delete blog</button>
               </div>
             )}
           </div>

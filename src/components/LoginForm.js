@@ -5,10 +5,9 @@ import { useField } from '../hooks'
 
 const LoginForm = ({ handleLogin }) => {
   // eslint-disable-next-line no-unused-vars
-  let { reset, ...username }  = useField('text')
-  let password = useField('password')
-  delete password.reset
-  
+  let [ username ]  = useField('text')
+  let [ password ] = useField('password')
+
   return (
     <form onSubmit={e => {handleLogin(e, username, password)}}>
       <h2>Login to the application</h2>

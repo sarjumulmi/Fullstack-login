@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 
 import loginServices from './services/login'
 import blogServices from './services/blogs'
@@ -8,15 +9,10 @@ import Blog from './components/Blog'
 import Togglable from './components/Togglable'
 import LoginForm from './components/LoginForm'
 
+import { initBlogs, createBlog, resetBlogs } from './components/blogReducer'
+
 import './App.css'
 
-const BlogList = ({ blogs }) => (
-  blogs.map(blog => (
-    <div key={ blog.id }>
-      <Blog blog={ blog } />
-    </div>
-  ))
-)
 
 const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setUrl }) => (
   <form onSubmit={handleNewBlog}>
@@ -28,46 +24,48 @@ const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setU
   </form>
 )
 
-const App = () => {
+const App = ({ blogs, initBlogs, createBlog, resetBlogs }) => {
   const [message, setMessage] = useState(null)
   const [user, setUser] = useState(null)
-  const [blogs, setBlogs] = useState(null)
+  // const [blogs, setBlogs] = useState([])
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
   useEffect(() => {
-    const getBlogs = async () => {
-      const resp = await blogServices.getAll()
-      setBlogs(resp.data.sort((a, b) => b.likes - a.likes))
-    }
     if (window.localStorage.getItem('user')) {
-      const user = JSON.parse(window.localStorage.getItem('user'))
+      initBlogs()
+      blogServices.setToken(JSON.parse(window.localStorage.getItem('user')))
+    }
+  }, [])
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('user')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
       setUser(user)
       blogServices.setToken(user.token)
-      getBlogs()
     }
   }, [])
 
   const handleLogout = () => {
     window.localStorage.removeItem('user')
     setUser(null)
-    setBlogs(null)
+    resetBlogs()
   }
 
   const handleLogin = async (e, username, password) => {
     e.preventDefault()
     try {
       const user = await loginServices.login({ username: username.value, password: password.value })
-      setUser(user)
       window.localStorage.setItem('user', JSON.stringify(user))
       blogServices.setToken(user.token)
-      const resp = await blogServices.getAll()
-      setBlogs(resp.data)
+      setUser(user)
       setMessage({ msg: `User ${username.value} logged in!`, type: 'success' })
       setTimeout(() => {
         setMessage(null)
       }, 5000)
+      initBlogs()
     } catch (error) {
       console.log(error)
       setMessage({ msg: (error.response && error.response.data && error.response.data.error) || 'incorrect credentials', type: 'error' })
@@ -80,12 +78,11 @@ const App = () => {
   const handleNewBlog = async (e) => {
     e.preventDefault()
     try {
-      const newBlog = await blogServices.create({ title, author, url })
-      setBlogs([...blogs, newBlog])
+      createBlog({ title, author, url })
       setAuthor('')
       setTitle('')
       setUrl('')
-      setMessage({ msg: `new blog ${newBlog.title} created!`, type: 'success' })
+      setMessage({ msg: `new blog ${title} created!`, type: 'success' })
       setTimeout(() => {
         setMessage(null)
       }, 5000)
@@ -101,6 +98,23 @@ const App = () => {
     }
   }
 
+  const handleLike = async (blog) => {
+    // const likedBlog = { ...blog, likes: blog.likes + 1 }
+    // const updatedBlog = await blogServices.update(likedBlog)
+    // setBlogs(blogs.map(b => b.id === blog.id ? updatedBlog : b))
+    // setMessage({ msg: `blog ${blog.title} liked!`, type: 'success' })
+    // setTimeout(() => {
+    //   setMessage(null)
+    // }, 5000)
+  }
+
+  const handleDeleteBlog = async (blog) => {
+    if (window.confirm(`remove Blog ${blog.title} by ${blog.author}?`)) {
+      // await blogServices.remove(blog)
+      // setBlogs(null)
+    }
+  }
+
   return (
     <div>
       {message && <Notification message={message} />}
@@ -110,7 +124,11 @@ const App = () => {
           <h2>Blogs</h2>
           <div>{user.username} logged in</div>
           <span><button onClick={handleLogout} >Logout</button></span>
-          {blogs && <BlogList blogs={blogs} />}
+          {blogs.sort((a, b) => b.likes - a.likes).map(blog => (
+            <div key={ blog.id }>
+              <Blog blog={ blog } handleDeleteBlog={handleDeleteBlog} handleLike={handleLike} isCreator={true} user={user}/>
+            </div>
+          ))}
           <Togglable buttonLabel='Create new blog'>
             <BlogForm handleNewBlog={handleNewBlog} title={title} setTitle={setTitle} author={author} setAuthor={setAuthor} url={url} setUrl={setUrl} />
           </Togglable>
@@ -120,4 +138,12 @@ const App = () => {
   )
 }
 
-export default App
+const mapStateToProps = ({ blogs }) => ({
+  blogs
+})
+
+const mapDispatchToProps = {
+  initBlogs, createBlog, resetBlogs
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
