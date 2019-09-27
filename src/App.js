@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
-import loginServices from './services/login'
 import blogServices from './services/blogs'
 
 import Notification from './components/Notification'
@@ -11,6 +10,7 @@ import LoginForm from './components/LoginForm'
 
 import { initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog } from './components/blogReducer'
 import { notify } from './components/notificationReducer'
+import { loginUser, logout } from './components/userReducer'
 
 import './App.css'
 
@@ -25,15 +25,14 @@ const BlogForm = ({ handleNewBlog, title, author, url, setTitle, setAuthor, setU
   </form>
 )
 
-const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, message, notify }) => {
-  // const [message, setMessage] = useState(null)
-  const [user, setUser] = useState(null)
-  // const [blogs, setBlogs] = useState([])
+const App = (props) => {
+  const { blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, message, notify, user, loginUser, logout } = props
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
 
   useEffect(() => {
+    console.log('user is: ', user)
     if (window.localStorage.getItem('user')) {
       initBlogs()
       blogServices.setToken(JSON.parse(window.localStorage.getItem('user')))
@@ -44,7 +43,6 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, m
     const loggedUserJSON = window.localStorage.getItem('user')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
       blogServices.setToken(user.token)
     }
   }, [])
@@ -52,17 +50,14 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, m
   const handleLogout = () => {
     notify({ msg: `User ${user.username} logged out!`, type: 'success' })
     window.localStorage.removeItem('user')
-    setUser(null)
+    logout()
     resetBlogs()
   }
 
   const handleLogin = async (e, username, password) => {
     e.preventDefault()
     try {
-      const user = await loginServices.login({ username: username.value, password: password.value })
-      window.localStorage.setItem('user', JSON.stringify(user))
-      blogServices.setToken(user.token)
-      setUser(user)
+      loginUser(username.value, password.value)
       notify({ msg: `User ${username.value} logged in!`, type: 'success' })
       initBlogs()
     } catch (error) {
@@ -103,8 +98,8 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, m
   return (
     <div>
       {message && <Notification message={message} />}
-      {user === null && <LoginForm handleLogin={handleLogin} />}
-      {user !== null && (
+      {Object.keys(user).length === 0 && <LoginForm handleLogin={handleLogin} />}
+      {Object.keys(user).length !== 0 && (
         <div >
           <h2>Blogs</h2>
           <div>{user.username} logged in</div>
@@ -123,13 +118,14 @@ const App = ({ blogs, initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, m
   )
 }
 
-const mapStateToProps = ({ blogs, message }) => ({
+const mapStateToProps = ({ blogs, message, user }) => ({
   blogs,
-  message
+  message,
+  user
 })
 
 const mapDispatchToProps = {
-  initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, notify
+  initBlogs, createBlog, resetBlogs, likeBlog, deleteBlog, notify, loginUser, logout
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

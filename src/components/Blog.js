@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const Blog = ({ blog, handleDeleteBlog, handleLike, isCreator, user }) => {
+const Blog = ({ blog, handleDeleteBlog, handleLike, isCreator }) => {
   const [visible, setVisible] = useState(false)
 
   const toggleVisibility = () => {
