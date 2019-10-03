@@ -1,3 +1,11 @@
+@import url(//fonts.googleapis.com/css?family=Open+Sans);
+
+html, body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+input, textarea, button {font-family: inherit}
+
 .success {
   border: 1px solid yellowgreen;
   color: rgb(7, 139, 40)
