@@ -1,32 +1,25 @@
-import loginServices from '../services/login'
-import blogServices from '../services/blogs'
+import userServices from '../services/users'
 
-export const loginUser = (username, password) => {
+export const getAllUsers = () => {
   return async (dispatch) => {
-    try {
-      const user = await loginServices.login({ username, password })
-      dispatch({
-        type: 'LOGIN',
-        payload: user
-      })
-      window.localStorage.setItem('user', JSON.stringify(user))
-      blogServices.setToken(user.token)
-    } catch (error) {
-      throw error
-    }
+    const users = await userServices.getAll()
+    dispatch({
+      type: 'GET_ALL',
+      payload: users
+    })
   }
 }
 
-export const logout = () => ({
-  type: 'LOGOUT'
+export const resetUsers = () => ({
+  type: 'RESET'
 })
 
-const userReducer = (state = {}, action) => {
+const userReducer = (state=[], action) => {
   switch (action.type) {
-  case 'LOGIN':
+  case 'GET_ALL':
     return action.payload
-  case 'LOGOUT':
-    return {}
+  case 'RESET':
+    return []
   default:
     return state
   }

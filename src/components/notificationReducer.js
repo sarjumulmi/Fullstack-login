@@ -3,7 +3,7 @@ const initialState = {
   msg: null
 }
 
-export const notify = (message) => {
+export const notify = (message, time=5000) => {
   return (dispatch) => {
     dispatch({
       type: 'SET_MSG',
@@ -13,7 +13,7 @@ export const notify = (message) => {
       dispatch({
         type: 'RESET_MSG'
       })
-    }, 5000)
+    }, time)
   }
 }
 
